@@ -1,17 +1,17 @@
 (function () {
   // Common project IDs mapped by entity names
   const ENTITY_IDS_MAP = {
-    MorningCatchup: {project_id: '2006582'},
-    WeekCalendarPlanning: {project_id: '2309887'},
-    Combinvest: {project_id: '2013916', task_id: '12944812'},
-    CombinvestDaily: {project_id: '2007084'},
-    AfternoonCatchup: {project_id: '2006786'},
-    CodeReview: {project_id: '2006788'},
-    CombinvestSprintPlanning: {project_id: '2007185'},
-    CombinvestSprintReviewRetro: {project_id: '2007106'},
-    Decompress: {project_id: '2015035'},
-    KapsysInternalCall: {project_id: '2007116'},
-    CombinvestRefinement: {project_id: '2007104'}
+    MorningCatchup: { project_id: '2006582' },
+    WeekCalendarPlanning: { project_id: '2309887' },
+    Combinvest: { project_id: '2013916', task_id: '12944812' },
+    CombinvestDaily: { project_id: '2007084' },
+    AfternoonCatchup: { project_id: '2006786' },
+    CodeReview: { project_id: '2006788' },
+    CombinvestSprintPlanning: { project_id: '2007185' },
+    CombinvestSprintReviewRetro: { project_id: '2007106' },
+    Decompress: { project_id: '2015035' },
+    KapsysInternalCall: { project_id: '2007116' },
+    CombinvestRefinement: { project_id: '2007104' }
   };
 
   // The word field is used to search for events
@@ -73,7 +73,7 @@
   };
 
   const TASKS_TO_DELETE_MAP = {
-    Lunch: {word: 'Lunch'}
+    Lunch: { word: 'Lunch' }
   };
 
   // flatten TASK_MAP so nested objects in 'Combinvest' group are iterated over
@@ -100,7 +100,7 @@
       if (taskName.toLowerCase().includes(word.toLowerCase())) {
         const eventId = eventEl.getAttribute('data-id');
         if (eventId) {
-          matchingEvents.push({id: Number(eventId)});
+          matchingEvents.push({ id: Number(eventId) });
         }
       }
     });
@@ -122,7 +122,7 @@
           authorization:
               'Basic bWFrc3ltLnBhdmxlbmtvQGthcHN5cy5pbzo3N2M0ZG00OWJmNjRidTZwaWowMm9yYTAwNw=='
         },
-        ...(body && {body: JSON.stringify(body)})
+        ...(body && { body: JSON.stringify(body) })
       });
 
       const result = await response.json();
@@ -135,7 +135,7 @@
   function makeApiCallForEvents(map, url) {
     for (const taskApiValue of flattenTasks(map)) {
       (async () => {
-        const {word, ...task} = taskApiValue;
+        const { word, ...task } = taskApiValue;
         const events = getEventsWithTaskWord(word);
 
         if (!events) return;
@@ -157,7 +157,7 @@
 
   Object.values(TASKS_TO_DELETE_MAP).forEach(task => {
     const events = getEventsWithTaskWord(task.word);
-    const params = new URLSearchParams({data: JSON.stringify(events)});
+    const params = new URLSearchParams({ data: JSON.stringify(events) });
     makeApiCall(`https://pro.trackingtime.co/api/v4/529757/events/delete?${params.toString()}`);
   });
 })();
