@@ -1,0 +1,10 @@
+{
+  "name": "tracking-time-project-assigner",
+  "version": "1.0.0",
+  "description": "This script is intended to automate the process of assigning projects to tickets inside corporate TrackingTime.",
+  "main": "index.js",
+  "scripts": {
+  },
+  "author": "max-pidhorny",
+  "license": "ISC"
+}
