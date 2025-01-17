@@ -139,7 +139,7 @@
       const { word, ...task } = taskApiValue;
       const events = getEventsWithTaskWord(word);
 
-      if (!events) return;
+      if (!events) return Promise.resolve();
 
       const payload = {
         ...task,
