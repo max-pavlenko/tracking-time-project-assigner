@@ -5,7 +5,7 @@ Additionally, it can delete certain tasks marked for deletion, such as lunch bre
 ## Setup
 
 1. **Include the Script:**  
-   Press F12. Insert the script into a browser console or embed it into a page that contains the events you want to process.
+   Press F12. Insert the script into a browser console.
 
 2. **Configuration:**
     - `ENTITY_IDS_MAP`- define common project and task IDs for your entities.

@@ -1,4 +1,4 @@
-(function () {
+(async function () {
   // Common project IDs mapped by entity names
   const ENTITY_IDS_MAP = {
     MorningCatchup: { project_id: '2006582' },
@@ -13,6 +13,8 @@
     KapsysInternalCall: { project_id: '2007116' },
     CombinvestRefinement: { project_id: '2007104' }
   };
+
+  const AUTH_TOKEN = 'bWFrc3ltLnBhdmxlbmtvQGthcHN5cy5pbzo3N2M0ZG00OWJmNjRidTZwaWowMm9yYTAwNw==';
 
   // The word field is used to search for events
   const TASK_MAP = {
@@ -91,19 +93,19 @@
 
   function getEventsWithTaskWord(word) {
     const allEvents = document.querySelectorAll('div[data-comp="event"]');
-    const matchingEvents = [];
 
-    allEvents.forEach(eventEl => {
+    const matchingEvents = Array.from(allEvents).reduce((acc, eventEl) => {
       const noteEl = eventEl.querySelector('.notes[data-comp="note"]');
       const taskName = noteEl ? noteEl.textContent.trim() : '';
 
       if (taskName.toLowerCase().includes(word.toLowerCase())) {
         const eventId = eventEl.getAttribute('data-id');
         if (eventId) {
-          matchingEvents.push({ id: Number(eventId) });
+          acc.push({ id: Number(eventId) });
         }
       }
-    });
+      return acc;
+    }, []);
 
     if (matchingEvents.length === 0) {
       console.log(`No events with word "${word}" found.`);
@@ -120,7 +122,7 @@
         headers: {
           'Content-Type': 'application/json',
           authorization:
-              'Basic bWFrc3ltLnBhdmxlbmtvQGthcHN5cy5pbzo3N2M0ZG00OWJmNjRidTZwaWowMm9yYTAwNw=='
+              `Basic ${AUTH_TOKEN}`
         },
         ...(body && { body: JSON.stringify(body) })
       });
@@ -132,32 +134,31 @@
     }
   }
 
-  function makeApiCallForEvents(map, url) {
-    for (const taskApiValue of flattenTasks(map)) {
-      (async () => {
-        const { word, ...task } = taskApiValue;
-        const events = getEventsWithTaskWord(word);
+  async function makeApiCallForEvents(map, url) {
+    return Promise.all(flattenTasks(map).map(taskApiValue => {
+      const { word, ...task } = taskApiValue;
+      const events = getEventsWithTaskWord(word);
 
-        if (!events) return;
+      if (!events) return;
 
-        const payload = {
-          ...task,
-          data: JSON.stringify(events)
-        };
+      const payload = {
+        ...task,
+        data: JSON.stringify(events)
+      };
 
-        makeApiCall(url, payload);
-      })();
-    }
+      return makeApiCall(url, payload);
+    }));
   }
 
-  makeApiCallForEvents(
-      TASK_MAP,
-      'https://pro.trackingtime.co/api/v4/529757/events/update/batch?ClientApp=TrackingTimeWEB%20PROD%206.94:u=718561&ClientID=78d3951c-0d0e-4cfd-b19d-6243feb1a642'
-  );
-
-  Object.values(TASKS_TO_DELETE_MAP).forEach(task => {
-    const events = getEventsWithTaskWord(task.word);
-    const params = new URLSearchParams({ data: JSON.stringify(events) });
-    makeApiCall(`https://pro.trackingtime.co/api/v4/529757/events/delete?${params.toString()}`);
-  });
+  await Promise.all([
+    makeApiCallForEvents(
+        TASK_MAP,
+        'https://pro.trackingtime.co/api/v4/529757/events/update/batch'
+    ),
+    Object.values(TASKS_TO_DELETE_MAP).map(task => {
+      const events = getEventsWithTaskWord(task.word);
+      const params = new URLSearchParams({ data: JSON.stringify(events) });
+      return makeApiCall(`https://pro.trackingtime.co/api/v4/529757/events/delete?${params.toString()}`);
+    })
+  ])
 })();
